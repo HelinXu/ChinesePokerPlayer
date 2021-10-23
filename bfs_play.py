@@ -4,6 +4,8 @@
 import random
 import numpy as np
 import time
+import argparse
+from queue import Queue
 
 def initialize(N):
     '''random initialize my cards, count = N
@@ -24,6 +26,12 @@ def initialize(N):
     return cards
 
 
+def card_hash(cards):
+    s = sum(cards)
+    for i in cards:
+        s = s * 10 + i
+    return s
+
 def play_cards(my_cards, cards_to_play):
     my_cards_after = my_cards - cards_to_play
     assert min(my_cards_after) >= 0, "invalid play!"
@@ -34,7 +42,8 @@ def in_limit(my_cards, cards_to_play):
     '''用来判断是否可以出这个手牌。'''
     return (min(my_cards - cards_to_play) >= 0)
 
-def get_possible_plays(my_cards, upper_num):
+
+def get_possible_plays(my_cards, hash_upper):
     possible_plays = []
     # 三顺子
     for i in range(2, 12): # 连续的3个的组数
@@ -137,16 +146,30 @@ def get_possible_plays(my_cards, upper_num):
     if in_limit(my_cards, np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append(np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]))
     possible_plays_tmp = []
     for play in possible_plays:
-        if sum(play) <= upper_num: possible_plays_tmp.append(play)
-    possible_plays_tmp.sort(key=lambda x: -x.sum())
+        if card_hash(play) <= hash_upper: possible_plays_tmp.append(play)
+    possible_plays_tmp.sort(key=lambda x: -card_hash(x))
     return possible_plays_tmp
 
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', help='number of cards', type=int, default=20)
+    opt = parser.parse_args()
     tic = time.time()
-    for i in range(1000):
-        cards = initialize(50)
-        get_possible_plays(cards, 10)
-    toc = time.time()
-    print((toc - tic)/1000)
+    upper = 1e18
+    cards = initialize(opt.n)
+    q = Queue()
+    q.put((cards, 0, upper))
+    while not q.empty():
+        v = q.get()
+        neighbors = get_possible_plays(v[0], v[2])
+        num = v[1]
+        for play in neighbors:
+            v2 = play_cards(v[0], play)
+            if (max(v2) == 0): 
+                print(f'Done! {num}')
+                toc = time.time()
+                print(toc - tic)
+            q.put((v2, num + 1, card_hash(play)))
+
