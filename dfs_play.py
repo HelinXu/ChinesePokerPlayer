@@ -5,8 +5,8 @@ import random
 import numpy as np
 import time
 import argparse
-from queue import Queue
 import copy
+
 
 class CardGame(object):
     def __init__(self, cards=None, N=0):
@@ -21,9 +21,6 @@ class CardGame(object):
         self.max_min_depth = 54 # 目前搜索到最短的出牌方式。不会比着出牌更多了。
         self.current_best_solution = [] # 目前搜索的最好出牌方式。
         self.current_path = ['init',]
-        # self.closed = set() # close set. All explored
-        # self.print_info = [] # list of dic {'card': list of cards, 'policy': string e.g.'四带二'}
-        # self.policy_list = [] # list of dic {'step': step, 'score': score}
     
 
     def initialize(self, N):
@@ -44,8 +41,10 @@ class CardGame(object):
                 cards[x//4] += 1
         return cards
 
+
     def done(self):
         return sum(self.my_cards) == 0
+
 
     def play_cards(self, cards_to_play):
         my_cards_after = self.my_cards - cards_to_play
@@ -53,13 +52,16 @@ class CardGame(object):
         self.current_path.append(cards_to_play)
         self.my_cards = my_cards_after
 
+
     def restore_cards(self, cards_to_restore):
         self.current_path.pop()
         self.my_cards = self.my_cards + cards_to_restore
 
+
     def in_limit(self, cards_to_play):
         '''用来判断是否可以出这个手牌。'''
         return (min(self.my_cards - cards_to_play) >= 0)
+
 
     def get_possible_plays(self):
         possible_plays = []
@@ -165,6 +167,7 @@ class CardGame(object):
         possible_plays.sort(key=lambda x: -sum(x))
         return possible_plays
 
+
     def dfs(self, depth):
         if self.done():
             if depth < self.max_min_depth:
@@ -179,7 +182,8 @@ class CardGame(object):
             self.play_cards(this_play)
             self.dfs(depth + 1)
             self.restore_cards(this_play)
-    
+
+
     def solve_game(self):
         print(f'initialization: {list(self.my_cards)}')
         self.dfs(0)
@@ -194,3 +198,5 @@ if __name__ == '__main__':
     tic = time.time()
     game = CardGame(N=opt.n, cards=opt.c)
     game.solve_game()
+    toc = time.time()
+    print(f'time: {toc - tic}')
