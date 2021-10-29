@@ -62,9 +62,6 @@ class CardGame(object):
         return (min(self.my_cards - cards_to_play) >= 0)
 
     def get_possible_plays(self):
-        # max_min_step = sum(my_cards != np.zeros(my_cards.shape))
-        # ave_num = sum(my_cards) / max_min_step# 几次一定可以出完？不能出得比这少！
-        # print(ave_num)
         possible_plays = []
         S = sum(self.my_cards)
         if S >= 6:
@@ -175,9 +172,6 @@ class CardGame(object):
                 self.current_best_solution.clear()
                 self.current_best_solution = copy.deepcopy(self.current_path)
             return
-        # if sum(self.my_cards) > (self.max_min_depth - depth - 1) * last_num: # cannot make it!
-        #     print('cut')
-        #     return
         possible_plays = self.get_possible_plays()
         for this_play in possible_plays:
             if sum(self.my_cards) > (self.max_min_depth - depth - 1) * sum(this_play): break # 如果按照现在这种出法，无法提前一次，则不必继续搜索
@@ -200,5 +194,3 @@ if __name__ == '__main__':
     tic = time.time()
     game = CardGame(N=opt.n, cards=opt.c)
     game.solve_game()
-
-
