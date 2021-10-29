@@ -44,6 +44,9 @@ def in_limit(my_cards, cards_to_play):
 
 
 def get_possible_plays(my_cards, hash_upper):
+    max_min_step = sum(my_cards != np.zeros(my_cards.shape))
+    ave_num = sum(my_cards) / max_min_step# 几次一定可以出完？不能出得比这少！
+    # print(ave_num)
     possible_plays = []
     # 三顺子
     for i in range(2, 12): # 连续的3个的组数
@@ -146,7 +149,7 @@ def get_possible_plays(my_cards, hash_upper):
     if in_limit(my_cards, np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append(np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]))
     possible_plays_tmp = []
     for play in possible_plays:
-        if card_hash(play) <= hash_upper: possible_plays_tmp.append(play)
+        if card_hash(play) <= hash_upper and len(play) >= ave_num: possible_plays_tmp.append(play)
     possible_plays_tmp.sort(key=lambda x: -card_hash(x))
     return possible_plays_tmp
 
@@ -164,6 +167,7 @@ if __name__ == '__main__':
     while not q.empty():
         v = q.get()
         neighbors = get_possible_plays(v[0], v[2])
+        # print(len(neighbors))
         num = v[1]
         for play in neighbors:
             v2 = play_cards(v[0], play)
