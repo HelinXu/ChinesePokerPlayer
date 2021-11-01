@@ -123,7 +123,7 @@ class Judger(object):
         self.Bcards = np.array([0] * 15)
         self.played_cards = np.array([0] * 15)
         self.init_hand_out()
-
+        self.game_on = True
     
     def init_hand_out(self):
         '''hand out cards!'''
@@ -143,39 +143,26 @@ class Judger(object):
         '''this cards in limit of hand cards'''
         return (min(hand_cards - cards_to_play) >= 0)
     
+    def A_play(self, Adecision):
+        print(f'A plays: {Adecision}, remains {self.Acards}')
+        self.Acards -= Adecision[0]
+        self.played_cards += Adecision[0]
+        if sum(self.Acards) == 0:
+            print('A wins')
+            self.game_on = False
 
-    def larger_cards(self, this, last):
-        '''this cards > last cards (comparable and larger)'''
-        if last[13] == last[14] == 1:
-            # 双王
-            return False
-        a = [0, 0, 0, 0, 0] # 0,1,2,3,4; blackj, redj
-        b = [0, 0, 0, 0, 0] # 0,1,2,3,4; blackj, redj
-        for i in range(15):
-            a[this[i]] += 1
-            b[last[i]] += 1
-        print(this, a, last, b)
-        if (a == b == [14, 1, 0, 0, 0]):
-            pass
-        if a != b:
-            return False
-
-
-
-    def check_valid_input(self, this_cards, last_cards, hand_cards):
-        '''
-        1) this cards > last cards (comparable and larger)
-        2) this cards in limit of hand cards
-        '''
-
-
-    def get_a_input(self, cards):
-        pass
+    def B_play(self, Bdecision):
+        print(f'B plays: {Bdecision}, remains {self.Bcards}')
+        self.Bcards -= Bdecision[0]
+        self.played_cards += Bdecision[0]
+        if sum(self.Bcards) == 0:
+            print('B wins')
+            self.game_on = False
 
 
 class Player(object):
     def __init__(self, cards):
-        self.cards = cards # [0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]
+        self.cards = deepcopy(cards) # [0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]
         self.played_cards = np.array([0] * 15)
         self.unknown_cards = np.array([4] * 13 + [1, 1]) - cards
     
@@ -190,8 +177,8 @@ class Player(object):
         self.played_cards += last
         options = self.get_options(self.cards, format, value)
         decision = options[0]
-        self.cards -= decision
-        self.played_cards += decision
+        self.cards -= decision[0]
+        self.played_cards += decision[0]
         return decision
 
 
@@ -268,7 +255,17 @@ class Player(object):
 
 
 if __name__ == '__main__':
-    j = Judger()
-    j.larger_cards(np.array([0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]),np.array([0,0,4,0,0,0,0,0,0,0,0,2,0,1,1]))
-    p = Player(np.array([1,0,0,0,0,0,0,0,1,0,0,0,4,0,0]))
-    p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), 'null', 1)
+    # j = Judger()
+    # j.larger_cards(np.array([0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]),np.array([0,0,4,0,0,0,0,0,0,0,0,2,0,1,1]))
+    # p = Player(np.array([1,0,0,0,0,0,0,0,1,0,0,0,4,0,0]))
+    # p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), 'null', 1)
+    judger = Judger()
+    A = Player(judger.Acards)
+    B = Player(judger.Bcards)
+    Bdecision = (np.array([0]*15), 'null', -1)
+    while judger.game_on:
+        Adecision = A.play(Bdecision[0], format=Bdecision[1], value=Bdecision[2])
+        judger.A_play(Adecision)
+        if not judger.game_on: break
+        Bdecision = B.play(Adecision[0], format=Adecision[1], value=Adecision[2])
+        judger.B_play(Bdecision)
