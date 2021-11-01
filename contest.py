@@ -106,6 +106,11 @@ def get_possible_plays(my_cards):
         if in_limit(my_cards, play): possible_plays.append((play, '1', i))
     # 火箭
     if in_limit(my_cards, np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append((np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]), 'rocket', 13))
+    if len(possible_plays) == 0:
+        possible_plays.append((np.array([0]*15), 'null', -1))
+        return possible_plays
+    possible_plays.sort(key=lambda x: -(sum(x[0])*3-x[2])) # 先出小牌和张数多的牌
+    possible_plays = possible_plays[:20]
     return possible_plays
 
 
@@ -192,7 +197,7 @@ class Player(object):
         options = []
         # play
         if format == 'null':
-            options = get_possible_plays(hand_cards)
+            return get_possible_plays(hand_cards)
         elif format == 'rocket':
             pass
         elif format == '4+2+2':
@@ -262,5 +267,5 @@ class Player(object):
 if __name__ == '__main__':
     j = Judger()
     j.larger_cards(np.array([0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]),np.array([0,0,4,0,0,0,0,0,0,0,0,2,0,1,1]))
-    p = Player(np.array([1,4,2,0,0,2,0,0,1,0,3,0,4,1,1]))
+    p = Player(np.array([1,0,0,0,0,0,0,0,1,0,0,0,4,0,0]))
     p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), 'null', 1)
