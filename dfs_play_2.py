@@ -15,9 +15,10 @@ class CardGame(object):
         Input:
             cards: (15) Numpy array, cards[i] corresponds to the number of certain card-face.
         '''
-        if cards == None:
+        if N != 0:
             self.my_cards = self.initialize(N)
         else:
+            # assert cards != None # TODO
             self.my_cards = cards
         self.value = 0
         self.max_score = 0
