@@ -61,8 +61,10 @@ class MainWindow(object):
         self.text1 = tk.Label(self.window, text='Enter Num of Cards:')
         self.text1.place(x=self._marginX + 320, y=(self._marginY+21+self._cardY))
 
-        self.text2 = tk.Label(self.window, text='[Result]')
-        self.text2.place(x=self._marginX + 650, y=(self._marginY+21+self._cardY))
+        self.text = tk.StringVar()
+        self.text.set('[Result]')
+        self.text2 = tk.Label(self.window, textvariable=self.text)
+        self.text2.place(x=self._marginX + 700, y=(self._marginY+21+self._cardY))
 
         self.canvas.bind('<Button-1>', self.clickCanvas)
         print('success initial display.')
@@ -72,7 +74,7 @@ class MainWindow(object):
         self.reset()
         self.N = int(self.entry1.get())
         self.N = min(54, self.N)
-        self.entry1.delete(0, 100)
+        self.entry1.select_range(0, 100)
         for x in random.sample(range(0, 54), self.N):
             self.select_card_i(x)
 
@@ -84,6 +86,7 @@ class MainWindow(object):
             self.canvas.delete(f'box_{i}')
             self.canvas.delete(f'img_{i}')
         self.selected_idx = set()
+        self.text.set('[Result]')
         self._stage = "select"
 
 
@@ -95,26 +98,32 @@ class MainWindow(object):
 
     def solve_1(self):
         if self._stage != "select":
+            self.text.set('please press reset button!')
             print('please press reset button!')
             return
+        self.text.set('starting to solve 1')
         print('starting to solve 1')
         self._stage = "display"
         self.get_statistics()
         game1 = Game1(cards=self.cards)
         game1.solve_game()
         self.display_solution(game1.current_best_solution)
+        self.text.set(f'Question1 result: steps = {game1.max_min_depth}')
 
 
     def solve_2(self):
         if self._stage != "select":
+            self.text.set('please press reset button!')
             print('please press reset button!')
             return
+        self.text.set('starting to solve 2')
         print('starting to solve 2')
         self._stage = "display"
         self.get_statistics()
         game2 = Game2(cards=self.cards)
         game2.solve_game()
         self.display_solution(game2.current_best_solution)
+        self.text.set(f'Question2 result: score = {game2.max_score}')
 
 
     def display_solution(self, solution):
