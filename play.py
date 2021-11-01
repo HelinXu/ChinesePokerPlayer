@@ -18,6 +18,7 @@ class MainWindow(object):
     _minWidth, _minHeight = 1280, 720
     _marginX, _marginY, _marginC = 30, 30, 21
     _cardX, _cardY = 100, 140
+    _stage = "select"
 
     def __init__(self):
         self.window = tk.Tk()
@@ -27,6 +28,7 @@ class MainWindow(object):
         self.card_imgs = []
         self.selected_idx = set()
         self.init_components()
+        self._stage = "select"
         self.window.mainloop()
 
     def init_components(self):
@@ -45,9 +47,20 @@ class MainWindow(object):
         
         self.button1 = tk.Button(self.window, text="Solve 1", padx=1, pady=1, command=self.solve_1)
         self.button1.place(x=self._marginX, y=(self._marginY+20+self._cardY))
+        self.button2 = tk.Button(self.window, text="Reset", padx=1, pady=1, command=self.reset)
+        self.button2.place(x=self._marginX + 100, y=(self._marginY+20+self._cardY))
 
         self.canvas.bind('<Button-1>', self.clickCanvas)
         print('success initial display.')
+
+    def reset(self):
+        self.cards = np.array([0] * 15)
+        for i in self.selected_idx:
+            print(f'remove {self.idx2cardName(i)}')
+            self.canvas.delete(f'box_{i}')
+            self.canvas.delete(f'img_{i}')
+        self.selected_idx = set()
+        self._stage = "select"
 
 
     def get_statistics(self):
@@ -57,11 +70,16 @@ class MainWindow(object):
 
 
     def solve_1(self):
+        if self._stage != "select":
+            print('please press reset button!')
+            return
         print('starting to solve 1')
+        self._stage = "display"
         self.get_statistics()
         game1 = Game1(cards=self.cards)
         game1.solve_game()
         self.display_solution(game1.current_best_solution)
+
 
     def display_solution(self, solution):
         x = self._marginX
@@ -72,7 +90,7 @@ class MainWindow(object):
             for j in range(len(solution[i])): # j 0-14
                 if (j == 13 or j == 14) and solution[i][j] and j + 39 in idxs:
                     idxs.remove(j+39)
-                    self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[j + 39])
+                    self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[j + 39], tag=f'img_{j+39}')
                     x += self._marginC
                 else:
                     count = solution[i][j]
@@ -83,7 +101,7 @@ class MainWindow(object):
                             if idx in idxs:
                                 # print(self.idx2cardName(idx))
                                 idxs.remove(idx)
-                                self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[idx])
+                                self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[idx], tag=f'img_{idx}')
                                 x += self._marginC
                                 break
             x += self._cardX + self._marginC
@@ -129,6 +147,9 @@ class MainWindow(object):
 
 
     def clickCanvas(self, event):
+        if self._stage != "select":
+            print('please press reset button!')
+            return
         point = (event.x, event.y)
         if (point[1] > self._marginY
             and point[1] < self._marginY + self._cardY
