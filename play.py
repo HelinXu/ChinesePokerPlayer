@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import os, sys
 import numpy as np
 from dfs_play import CardGame as Game1
+from dfs_play_2 import CardGame as Game2
 from copy import deepcopy
 
 os.chdir(sys.path[0])
@@ -27,6 +28,7 @@ class MainWindow(object):
         self.cards = np.array([0] * 15)
         self.card_imgs = []
         self.selected_idx = set()
+        self.N = 0
         self.init_components()
         self._stage = "select"
         self.window.mainloop()
@@ -46,12 +48,34 @@ class MainWindow(object):
             self.canvas.create_image((self._marginX + self._marginC*i, self._marginY), anchor='nw', image=self.card_imgs[i])
         
         self.button1 = tk.Button(self.window, text="Solve 1", padx=1, pady=1, command=self.solve_1)
-        self.button1.place(x=self._marginX, y=(self._marginY+20+self._cardY))
+        self.button1.place(x=self._marginX + 100, y=(self._marginY+20+self._cardY))
         self.button2 = tk.Button(self.window, text="Reset", padx=1, pady=1, command=self.reset)
-        self.button2.place(x=self._marginX + 100, y=(self._marginY+20+self._cardY))
+        self.button2.place(x=self._marginX, y=(self._marginY+20+self._cardY))
+        self.button3 = tk.Button(self.window, text="Solve 2", padx=1, pady=1, command=self.solve_2)
+        self.button3.place(x=self._marginX + 210, y=(self._marginY+20+self._cardY))
+
+        self.entry1 = tk.Entry(self.window)
+        self.entry1.place(x=self._marginX + 450, y=(self._marginY+20+self._cardY))
+        self.entry1.bind('<Return>', self.get_N)
+
+        self.text1 = tk.Label(self.window, text='Enter Num of Cards:')
+        self.text1.place(x=self._marginX + 320, y=(self._marginY+21+self._cardY))
+
+        self.text2 = tk.Label(self.window, text='[Result]')
+        self.text2.place(x=self._marginX + 650, y=(self._marginY+21+self._cardY))
 
         self.canvas.bind('<Button-1>', self.clickCanvas)
         print('success initial display.')
+
+
+    def get_N(self, event):
+        self.reset()
+        self.N = int(self.entry1.get())
+        self.N = min(54, self.N)
+        self.entry1.delete(0, 100)
+        for x in random.sample(range(0, 54), self.N):
+            self.select_card_i(x)
+
 
     def reset(self):
         self.cards = np.array([0] * 15)
@@ -81,6 +105,18 @@ class MainWindow(object):
         self.display_solution(game1.current_best_solution)
 
 
+    def solve_2(self):
+        if self._stage != "select":
+            print('please press reset button!')
+            return
+        print('starting to solve 2')
+        self._stage = "display"
+        self.get_statistics()
+        game2 = Game2(cards=self.cards)
+        game2.solve_game()
+        self.display_solution(game2.current_best_solution)
+
+
     def display_solution(self, solution):
         x = self._marginX
         y = self._marginY + self._cardY + 70
@@ -104,7 +140,10 @@ class MainWindow(object):
                                 self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[idx], tag=f'img_{idx}')
                                 x += self._marginC
                                 break
-            x += self._cardX + self._marginC
+            x += self._cardX
+            if x > self._marginX + self._marginC*45:
+                x = self._marginX
+                y += self._cardY + 50
 
 
     def idx2cardValue(self, i):
