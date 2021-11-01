@@ -1,6 +1,115 @@
 import numpy as np
 import random
 from copy import deepcopy
+
+
+def in_limit(my_cards, cards_to_play):
+    '''用来判断是否可以出这个手牌。'''
+    return (min(my_cards - cards_to_play) >= 0)
+
+
+def get_possible_plays(my_cards):
+    possible_plays = []
+    # 三顺子
+    for i in range(2, 12): # 连续的3个的组数
+        for j in range(0, 13-i):
+            play = np.array([0]*j + [3]*i + [0]*(15-i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'3*{i}', j))
+    # 间隔三顺子
+    for i in range(2, 6):
+        for j in range(0, 14-2*i):
+            play = np.array([0]*j + [3,0,]*i + [0]*(15-2*i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'3^{i}', j))
+    # 双顺子
+    for i in range(3, 12): # 连续的对子的组数
+        for j in range(0, 13-i):
+            play = np.array([0]*j + [2]*i + [0]*(15-i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'2*{i}', j))
+    # 间隔双顺子
+    for i in range(3, 6):
+        for j in range(0, 14-2*i):
+            play = np.array([0]*j + [2,0,]*i + [0]*(15-2*i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'2^{i}', j))
+    # 单顺子
+    for i in range(5, 12): # TODO
+        for j in range(0, 13-i):
+            play = np.array([0]*j + [1]*i + [0]*(15-i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'1*{i}', j))
+    # 间隔单顺子
+    for i in [5, 6]:
+        for j in range(0, 14-2*i):
+            play = np.array([0]*j + [1,0,]*i + [0]*(15-2*i-j))
+            if in_limit(my_cards, play):
+                possible_plays.append((play, f'1^{i}', j))
+    # 四带二对
+    for i in range(0,13): # 4
+        for j in range(0,12): # 2-1
+            if j == i: continue
+            for k in range(j+1,13): # 2-2
+                if k == i: continue
+                play = np.array([0]*15)
+                play[i] = 4
+                play[j] = 2
+                play[k] = 2
+                if in_limit(my_cards, play):
+                    possible_plays.append((play, '4+2+2', i))
+    # 四带二
+    for i in range(0,13):
+        for j in range(0,13):
+            if j == i: continue
+            play = np.array([0]*15)
+            play[i] = 4
+            play[j] = 2
+            if in_limit(my_cards, play):
+                possible_plays.append((play, '4+2', i))
+    # 三带二
+    for i in range(0,13):
+        for j in range(0,13):
+            if j == i: continue
+            play = np.array([0]*15)
+            play[i] = 3
+            play[j] = 2
+            if in_limit(my_cards, play):
+                possible_plays.append((play, '3+2', i))
+    # 三带一
+    for i in range(0,13):
+        for j in range(0,13):
+            if j == i: continue
+            play = np.array([0]*15)
+            play[i] = 3
+            play[j] = 1
+            if in_limit(my_cards, play): possible_plays.append((play, '3+1', i))
+    # 炸弹
+    for i in range(0,13):
+        play = np.array([0]*15)
+        play[i] = 4
+        if in_limit(my_cards, play): possible_plays.append((play, '4', i))
+    # 三张牌
+    for i in range(0,13):
+        play = np.array([0]*15)
+        play[i] = 3
+        if in_limit(my_cards, play): possible_plays.append((play, '3', i))
+    # 2
+    for i in range(0,13):
+        play = np.array([0]*15)
+        play[i] = 2
+        if in_limit(my_cards, play): possible_plays.append((play, '2', i))
+    # 1
+    for i in range(0,15):
+        play = np.array([0]*15)
+        play[i] = 1
+        if in_limit(my_cards, play): possible_plays.append((play, '1', i))
+    # 火箭
+    if in_limit(my_cards, np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append((np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]), 'rocket', 13))
+    return possible_plays
+
+
+
 class Judger(object):
     def __init__(self, ANum=20, BNum=20):
         self.ANum = ANum
@@ -74,10 +183,19 @@ class Player(object):
         # update
         self.unknown_cards -= last
         self.played_cards += last
-        my_cards = deepcopy(self.cards)
+        options = self.get_options(self.cards, format, value)
+        print(options)
+
+
+    def get_options(self, hand_cards, format, value):
+        my_cards = hand_cards
         options = []
         # play
-        if format == '4+2+2':
+        if format == 'null':
+            options = get_possible_plays(hand_cards)
+        elif format == 'rocket':
+            pass
+        elif format == '4+2+2':
             for i in range(value+1,15):
                 if self.cards[i] == 4:
                     my_cards[i] = 0
@@ -135,13 +253,14 @@ class Player(object):
                     tmp = np.array([0]*15)
                     for j in range(i, i+length*2, 2): tmp[j] = int(format[0])
                     options.append((tmp, format, i))           
-        
-        print(options)
-
+        if len(options) == 0:
+            options.append((np.array([0]*15), 'null', -1))
+        options.sort(key=lambda x: x[2])
+        return options
 
 
 if __name__ == '__main__':
     j = Judger()
     j.larger_cards(np.array([0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]),np.array([0,0,4,0,0,0,0,0,0,0,0,2,0,1,1]))
     p = Player(np.array([1,4,2,0,0,2,0,0,1,0,3,0,4,1,1]))
-    p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), '4+2+2', 1)
+    p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), 'null', 1)
