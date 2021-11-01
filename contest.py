@@ -255,17 +255,13 @@ class Player(object):
 
 
 if __name__ == '__main__':
-    # j = Judger()
-    # j.larger_cards(np.array([0,0,0,0,0,2,0,4,0,0,0,0,0,1,1]),np.array([0,0,4,0,0,0,0,0,0,0,0,2,0,1,1]))
-    # p = Player(np.array([1,0,0,0,0,0,0,0,1,0,0,0,4,0,0]))
-    # p.read_last(np.array([0,0,0,0,0,1,0,4,0,0,0,0,0,1,0]), 'null', 1)
     judger = Judger()
     A = Player(judger.Acards)
     B = Player(judger.Bcards)
     Bdecision = (np.array([0]*15), 'null', -1)
     while judger.game_on:
-        Adecision = A.play(Bdecision[0], format=Bdecision[1], value=Bdecision[2])
+        Adecision = A.play(*Bdecision)
         judger.A_play(Adecision)
         if not judger.game_on: break
-        Bdecision = B.play(Adecision[0], format=Adecision[1], value=Adecision[2])
+        Bdecision = B.play(*Adecision)
         judger.B_play(Bdecision)
