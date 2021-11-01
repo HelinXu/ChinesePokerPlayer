@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import os, sys
 import numpy as np
 from dfs_play import CardGame as Game1
+from copy import deepcopy
 
 os.chdir(sys.path[0])
 path=sys.path[0]
@@ -54,11 +55,39 @@ class MainWindow(object):
             self.cards[self.idx2cardValue(i)] += 1
         print(f'cards distribution: {self.cards}')
 
+
     def solve_1(self):
         print('starting to solve 1')
         self.get_statistics()
         game1 = Game1(cards=self.cards)
         game1.solve_game()
+        self.display_solution(game1.current_best_solution)
+
+    def display_solution(self, solution):
+        x = self._marginX
+        y = self._marginY + self._cardY + 70
+        idxs = deepcopy(self.selected_idx)
+        for i in range(1,len(solution)): # i 出的手牌手数
+            print(solution[i])
+            for j in range(len(solution[i])): # j 0-14
+                if (j == 13 or j == 14) and solution[i][j] and j + 39 in idxs:
+                    idxs.remove(j+39)
+                    self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[j + 39])
+                    x += self._marginC
+                else:
+                    count = solution[i][j]
+                    # print(count)
+                    while count:
+                        count -= 1
+                        for idx in [4*j, 4*j+1, 4*j+2, 4*j+3]:
+                            if idx in idxs:
+                                # print(self.idx2cardName(idx))
+                                idxs.remove(idx)
+                                self.canvas.create_image((x, y), anchor='nw', image=self.card_imgs[idx])
+                                x += self._marginC
+                                break
+            x += self._cardX + self._marginC
+
 
     def idx2cardValue(self, i):
         if i < 52: return int(i / 4)
@@ -108,31 +137,6 @@ class MainWindow(object):
             i = min(53, int((point[0] - self._marginX) / self._marginC))
             self.select_card_i(i)
 
-
-#     def getGamePoint(self, x, y):
-#         for row in range(0, self._gameWidth):
-#             x1 = self.getX(row)
-#             x2 = self.getX(row + 1)
-#             if x >= x1 and x < x2:
-#                 point_row = row
-#         for column in range(0, self._gameHeight):
-#             j1 = self.getY(column)
-#             j2 = self.getY(column + 1)
-#             if y >= j1 and y < j2:
-#                 point_column = column
-#         return Point(point_row, point_column)
-
-
-# class Point():
-#     def __init__(self, row, column):
-#         self.row = row
-#         self.column = column
-
-#     def isEqual(self, point):
-#         if self.row == point.row and self.column == point.column:
-#             return True
-#         else:
-#             return False
 
 
 if __name__ == '__main__':
