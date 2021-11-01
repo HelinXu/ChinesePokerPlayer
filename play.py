@@ -5,6 +5,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os, sys
 import numpy as np
+from dfs_play import CardGame as Game1
 
 os.chdir(sys.path[0])
 path=sys.path[0]
@@ -21,15 +22,15 @@ class MainWindow(object):
         self.window = tk.Tk()
         self.window.title("Chinese Poker")
         self.window.minsize(self._minWidth, self._minHeight)
-        # self.cards = np.array([0] * 15)
+        self.cards = np.array([0] * 15)
         self.card_imgs = []
         self.selected_idx = set()
-        self.init_card_display()
+        self.init_components()
         self.window.mainloop()
 
-    def init_card_display(self):
+    def init_components(self):
         self.canvas = tk.Canvas(self.window,
-                        bg="white",
+                        # bg="white",
                         width=self._minWidth,
                         height=self._minHeight)
         self.canvas.pack()
@@ -40,9 +41,24 @@ class MainWindow(object):
                     (Image.open(f'resource/pokers/{i+1}.png')).resize((self._cardX, self._cardY))
                     ))
             self.canvas.create_image((self._marginX + self._marginC*i, self._marginY), anchor='nw', image=self.card_imgs[i])
-        # self.canvas.create_rectangle(100,100,120,150,fill='blue',outline='blue')
+        
+        self.button1 = tk.Button(self.window, text="Solve 1", padx=1, pady=1, command=self.solve_1)
+        self.button1.place(x=self._marginX, y=(self._marginY+20+self._cardY))
+
         self.canvas.bind('<Button-1>', self.clickCanvas)
         print('success initial display.')
+
+
+    def get_statistics(self):
+        for i in self.selected_idx:
+            self.cards[self.idx2cardValue(i)] += 1
+        print(f'cards distribution: {self.cards}')
+
+    def solve_1(self):
+        print('starting to solve 1')
+        self.get_statistics()
+        game1 = Game1(cards=self.cards)
+        game1.solve_game()
 
     def idx2cardValue(self, i):
         if i < 52: return int(i / 4)

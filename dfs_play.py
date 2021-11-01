@@ -14,9 +14,10 @@ class CardGame(object):
         Input:
             cards: (15) Numpy array, cards[i] corresponds to the number of certain card-face.
         '''
-        if cards == None:
+        if N != 0:
             self.my_cards = self.initialize(N)
         else:
+            # assert cards != None # TODO
             self.my_cards = cards
         self.max_min_depth = 54 # 目前搜索到最短的出牌方式。不会比着出牌更多了。
         self.current_best_solution = [] # 目前搜索的最好出牌方式。
