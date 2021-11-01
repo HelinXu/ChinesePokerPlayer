@@ -179,7 +179,7 @@ class Player(object):
         self.played_cards = np.array([0] * 15)
         self.unknown_cards = np.array([4] * 13 + [1, 1]) - cards
     
-    def read_last(self, last, format, value):
+    def play(self, last, format, value):
         '''
         last 上次对手出牌。
         format: string, n+m/1*5,2*3,3*2/1^5,2^3,3^2/4+2+2
@@ -189,7 +189,10 @@ class Player(object):
         self.unknown_cards -= last
         self.played_cards += last
         options = self.get_options(self.cards, format, value)
-        print(options)
+        decision = options[0]
+        self.cards -= decision
+        self.played_cards += decision
+        return decision
 
 
     def get_options(self, hand_cards, format, value):
