@@ -21,7 +21,7 @@ class CardGame(object):
             # assert cards != None # TODO
             self.my_cards = cards
         self.value = 0
-        self.max_score = 0
+        self.max_score = log(1e-9)
         self.current_best_solution = [] # 目前搜索的最好出牌方式。
         self.current_path = ['init',]
     
@@ -68,44 +68,45 @@ class CardGame(object):
         return (min(self.my_cards - cards_to_play) >= 0)
 
 
-    def get_possible_plays(self):
+    def get_possible_plays(self, greedy=False):
         possible_plays = []
         S = sum(self.my_cards)
-        if S >= 6:
-            # 三顺子
-            for i in range(2, 12): # 连续的3个的组数
-                for j in range(0, 13-i):
-                    play = np.array([0]*j + [3]*i + [0]*(15-i-j))
-                    if self.in_limit(play): possible_plays.append((play, 7))
-            # 间隔三顺子
-            for i in range(2, 6):
-                for j in range(0, 14-2*i):
-                    play = np.array([0]*j + [3,0,]*i + [0]*(15-2*i-j))
-                    if self.in_limit(play): possible_plays.append((play, 7))
-            # 双顺子
-            for i in range(3, 12): # 连续的对子的组数
-                for j in range(0, 13-i):
-                    play = np.array([0]*j + [2]*i + [0]*(15-i-j))
-                    if self.in_limit(play): possible_plays.append((play, 6))
-            # 间隔双顺子
-            for i in range(3, 6):
-                for j in range(0, 14-2*i):
-                    play = np.array([0]*j + [2,0,]*i + [0]*(15-2*i-j))
-                    if self.in_limit(play): possible_plays.append((play, 6))
-        if S >= 5:
-            # 单顺子
-            for i in range(5, 12): # TODO
-                for j in range(0, 13-i):
-                    play = np.array([0]*j + [1]*i + [0]*(15-i-j))
+        if not greedy:
+            if S >= 6:
+                # 三顺子
+                for i in range(2, 12): # 连续的3个的组数
+                    for j in range(0, 13-i):
+                        play = np.array([0]*j + [3]*i + [0]*(15-i-j))
+                        if self.in_limit(play): possible_plays.append((play, 7))
+                # 间隔三顺子
+                for i in range(2, 6):
+                    for j in range(0, 14-2*i):
+                        play = np.array([0]*j + [3,0,]*i + [0]*(15-2*i-j))
+                        if self.in_limit(play): possible_plays.append((play, 7))
+                # 双顺子
+                for i in range(3, 12): # 连续的对子的组数
+                    for j in range(0, 13-i):
+                        play = np.array([0]*j + [2]*i + [0]*(15-i-j))
+                        if self.in_limit(play): possible_plays.append((play, 6))
+                # 间隔双顺子
+                for i in range(3, 6):
+                    for j in range(0, 14-2*i):
+                        play = np.array([0]*j + [2,0,]*i + [0]*(15-2*i-j))
+                        if self.in_limit(play): possible_plays.append((play, 6))
+            if S >= 5:
+                # 单顺子
+                for i in range(5, 13): # TODO
+                    for j in range(0, 13-i):
+                        play = np.array([0]*j + [1]*i + [0]*(15-i-j))
+                        if self.in_limit(play): possible_plays.append((play, 5))
+                # 间隔单顺子
+                for play in [np.array([1,0,1,0,1,0,1,0,1,0,0,0,0,0,0]),
+                            np.array([0,1,0,1,0,1,0,1,0,1,0,0,0,0,0]),
+                            np.array([0,0,1,0,1,0,1,0,1,0,1,0,0,0,0]),
+                            np.array([0,0,0,1,0,1,0,1,0,1,0,1,0,0,0]),
+                            np.array([1,0,1,0,1,0,1,0,1,0,1,0,0,0,0]),
+                            np.array([0,1,0,1,0,1,0,1,0,1,0,1,0,0,0])]:
                     if self.in_limit(play): possible_plays.append((play, 5))
-            # 间隔单顺子
-            for play in [np.array([1,0,1,0,1,0,1,0,1,0,0,0,0,0,0]),
-                        np.array([0,1,0,1,0,1,0,1,0,1,0,0,0,0,0]),
-                        np.array([0,0,1,0,1,0,1,0,1,0,1,0,0,0,0]),
-                        np.array([0,0,0,1,0,1,0,1,0,1,0,1,0,0,0]),
-                        np.array([1,0,1,0,1,0,1,0,1,0,1,0,0,0,0]),
-                        np.array([0,1,0,1,0,1,0,1,0,1,0,1,0,0,0])]:
-                if self.in_limit(play): possible_plays.append((play, 5))
         if S >= 8:
             # 四带二对
             for i in range(0,13): # 4
@@ -163,15 +164,34 @@ class CardGame(object):
                 play[i] = 2
                 if self.in_limit(play): possible_plays.append((play, 0))
             # 火箭
-            if self.in_limit(np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append(np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]))
+            if self.in_limit(np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1])): possible_plays.append((np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]), 0))
         # 1
         for i in range(0,15):
             play = np.array([0]*15)
             play[i] = 1
             if self.in_limit(play): possible_plays.append((play, 0))
-        possible_plays.sort(key=lambda x: -sum(x[0]) * (1 + x[1])) # 经验公式
+        possible_plays.sort(key=lambda x: -x[1])
+        if greedy:
+            possible_plays.sort(key=lambda x: -sum(x[0]))
         return possible_plays
 
+
+    def play_greedy(self, current_depth):
+        depth = current_depth
+        played = []
+        while not self.done():
+            this_play = self.get_possible_plays(greedy=True)[0]
+            played.append(this_play)
+            self.play_cards(this_play)
+            depth += 1
+        score = log(self.value + 1e-8) / log(depth)
+        if score > self.max_score:
+            self.max_score = score
+            self.current_best_solution.clear()
+            self.current_best_solution = copy.deepcopy(self.current_path)
+        # restore
+        for play in played:
+            self.restore_cards(play)
 
     def dfs(self, depth):
         if self.done():
@@ -182,13 +202,19 @@ class CardGame(object):
                 self.current_best_solution = copy.deepcopy(self.current_path)
             return
         possible_plays = self.get_possible_plays()
-        first = True
+        # print(possible_plays)
+        # first = True
         for this_play in possible_plays:
-            if this_play[1] == 0 and not first: break
-            first = False
-            self.play_cards(this_play)
-            self.dfs(depth + 1)
-            self.restore_cards(this_play)
+            # if this_play[1] == 0 and not first: break
+            # first = False
+            # 顺子出完之后就需要开始贪心，每次出牌最多的。
+            if this_play[1] <= 4:
+                self.play_greedy(depth)
+                break
+            else:
+                self.play_cards(this_play)
+                self.dfs(depth + 1)
+                self.restore_cards(this_play)
 
 
     def solve_game(self):
@@ -203,7 +229,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', help='list of cards', type=list, default=None)
     opt = parser.parse_args()
     tic = time.time()
-    game = CardGame(N=opt.n, cards=opt.c)
+    game = CardGame(N=opt.n, cards=[1, 1, 1, 1, 1, 4, 1, 1, 2, 4, 1, 1, 1, 0, 0])
     game.solve_game()
     toc = time.time()
     print(f'time: {toc - tic}')
