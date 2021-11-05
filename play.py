@@ -1,4 +1,5 @@
 import random
+import time
 from tkinter.constants import GROOVE, RAISED, RIDGE, SUNKEN
 from typing import Text
 import tkinter as tk
@@ -106,9 +107,11 @@ class MainWindow(object):
         self._stage = "display"
         self.get_statistics()
         game1 = Game1(cards=self.cards)
+        tic = time.time()
         game1.solve_game()
+        toc = time.time()
         self.display_solution(game1.current_best_solution)
-        self.text.set(f'Question1 result: steps = {game1.max_min_depth}')
+        self.text.set(f'Question1 result: steps = {game1.max_min_depth}, time = {toc - tic} s')
 
 
     def solve_2(self):

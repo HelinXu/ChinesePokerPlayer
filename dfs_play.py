@@ -21,7 +21,7 @@ class CardGame(object):
             self.my_cards = cards
         self.max_min_depth = 54 # 目前搜索到最短的出牌方式。不会比着出牌更多了。
         self.current_best_solution = [] # 目前搜索的最好出牌方式。
-        self.current_path = ['init',]
+        self.current_path = [[54],]
     
 
     def initialize(self, N):
@@ -178,7 +178,8 @@ class CardGame(object):
             return
         possible_plays = self.get_possible_plays()
         for this_play in possible_plays:
-            if sum(self.my_cards) > (self.max_min_depth - depth - 1) * sum(this_play): break # 如果按照现在这种出法，无法提前一次，则不必继续搜索
+            if (sum(self.my_cards) > (self.max_min_depth - depth - 1) * sum(this_play)
+                or sum(this_play) > sum(self.current_path[-1])): break # 如果按照现在这种出法，无法提前一次，则不必继续搜索
             # print(f'{self.my_cards} - {this_play} - {depth}')
             self.play_cards(this_play)
             self.dfs(depth + 1)
