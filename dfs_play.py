@@ -90,7 +90,7 @@ class CardGame(object):
                     if self.in_limit(play): possible_plays.append(play)
         if S >= 5:
             # 单顺子
-            for i in range(5, 12): # TODO
+            for i in range(5, 13): # TODO
                 for j in range(0, 13-i):
                     play = np.array([0]*j + [1]*i + [0]*(15-i-j))
                     if self.in_limit(play): possible_plays.append(play)
@@ -165,7 +165,7 @@ class CardGame(object):
             play = np.array([0]*15)
             play[i] = 1
             if self.in_limit(play): possible_plays.append(play)
-        possible_plays.sort(key=lambda x: -sum(x))
+        possible_plays.sort(key=lambda x: -sum(x)*16+np.min(np.nonzero(x)))
         return possible_plays
 
 
@@ -178,8 +178,8 @@ class CardGame(object):
             return
         possible_plays = self.get_possible_plays()
         for this_play in possible_plays:
-            if (sum(self.my_cards) > (self.max_min_depth - depth - 1) * sum(this_play)
-                or sum(this_play) > sum(self.current_path[-1])): break # 如果按照现在这种出法，无法提前一次，则不必继续搜索
+            if sum(self.my_cards) > (self.max_min_depth - depth - 1) * sum(this_play): break
+            if sum(this_play)*16-np.min(np.nonzero(this_play)) > sum(self.current_path[-1])*16-np.min(np.nonzero(self.current_path[-1])): continue # 如果按照现在这种出法，无法提前一次，则不必继续搜索
             # print(f'{self.my_cards} - {this_play} - {depth}')
             self.play_cards(this_play)
             self.dfs(depth + 1)
