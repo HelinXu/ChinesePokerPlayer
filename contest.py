@@ -1,3 +1,8 @@
+# Chinese Poker 1v1 contest
+# AI project: Chinese Poker
+# Author: HelinXu
+# Date: Nov 5, 2021
+
 import numpy as np
 import random
 from copy import deepcopy
@@ -35,7 +40,7 @@ def get_possible_plays(my_cards):
             if in_limit(my_cards, play):
                 possible_plays.append((play, f'2^{i}', j))
     # 单顺子
-    for i in range(5, 12): # TODO
+    for i in range(5, 13): # TODO
         for j in range(0, 13-i):
             play = np.array([0]*j + [1]*i + [0]*(15-i-j))
             if in_limit(my_cards, play):
@@ -258,6 +263,9 @@ if __name__ == '__main__':
     judger = Judger()
     A = Player(judger.Acards)
     B = Player(judger.Bcards)
+    print('Cards format: [3 4 5 6 7 8 9 10 J Q K A 2 BlackJoker RedJoker]')
+    print('A cards: ', A.cards)
+    print('B cards: ', B.cards)
     Bdecision = (np.array([0]*15), 'null', -1)
     while judger.game_on:
         Adecision = A.play(*Bdecision)

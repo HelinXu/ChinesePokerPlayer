@@ -1,6 +1,4 @@
 import numpy as np
-import math
-import random
 
 class CardGame(object):
     def __init__(self, cards=np.array([0]*15)):

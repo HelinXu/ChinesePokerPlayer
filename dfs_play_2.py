@@ -1,5 +1,7 @@
 # DFS search for least round solution
 # AI project 1.2
+# Author: HelinXu
+# Date: Nov 5, 2021
 
 import random
 import numpy as np
@@ -18,7 +20,6 @@ class CardGame(object):
         if N != 0:
             self.my_cards = self.initialize(N)
         else:
-            # assert cards != None # TODO
             self.my_cards = cards
         self.value = 0
         self.max_score = log(1e-9)
@@ -192,6 +193,7 @@ class CardGame(object):
         # restore
         for play in played:
             self.restore_cards(play)
+
 
     def dfs(self, depth, par_val=1e6):
         if self.done():

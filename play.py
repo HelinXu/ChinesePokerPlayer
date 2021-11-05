@@ -1,7 +1,10 @@
+# Main Window
+# AI project: Chinese Poker
+# Author: HelinXu
+# Date: Nov 5, 2021
+
 import random
 import time
-from tkinter.constants import GROOVE, RAISED, RIDGE, SUNKEN
-from typing import Text
 import tkinter as tk
 from PIL import Image, ImageTk
 import os, sys
