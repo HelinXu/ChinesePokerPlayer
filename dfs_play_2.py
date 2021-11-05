@@ -170,7 +170,7 @@ class CardGame(object):
             play = np.array([0]*15)
             play[i] = 1
             if self.in_limit(play): possible_plays.append((play, 0))
-        possible_plays.sort(key=lambda x: -x[1]*265-sum(x[0])*16+np.min(np.nonzero(x[0])))
+        possible_plays.sort(key=lambda x: -x[1]*256-sum(x[0])*16+np.min(np.nonzero(x[0])))
         if greedy:
             possible_plays.sort(key=lambda x: -sum(x[0]))
         return possible_plays
@@ -201,18 +201,15 @@ class CardGame(object):
                 self.current_best_solution.clear()
                 self.current_best_solution = copy.deepcopy(self.current_path)
             return
-        # if depth > len(self.current_best_solution): return
         possible_plays = self.get_possible_plays()
-        # print(possible_plays)
         first = True
         for this_play in possible_plays:
-            if this_play[1] == 0 and not first: break
-            first = False
-            if this_play[1]*265+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])) > par_val: continue
+            if not first: break
+            if this_play[1] == 0: first = False
+            if this_play[1]*256+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])) > par_val: continue
             else:
-                # print('else')
                 self.play_cards(this_play)
-                self.dfs(depth + 1, this_play[1]*265+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])))
+                self.dfs(depth + 1, this_play[1]*256+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])))
                 self.restore_cards(this_play)
 
 
