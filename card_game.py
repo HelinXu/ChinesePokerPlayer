@@ -9,14 +9,15 @@ class CardGame(object):
             cards: (15) Numpy array, cards[i] corresponds to the number of certain card-face.
         '''
         self.cards = cards
-        # self.statistics = self.get_statistics(self.cards)
-        self.min_step_table = self.get_min_step_table()
-    
+        self.closed = set() # close set. All explored
+        self.print_info = [] # list of dic {'card': list of cards, 'policy': string e.g.'四带二'}
+        self.policy_list = [] # list of dic {'step': step, 'score': score}
 
-    def get_statistics(self, cards):
-        pass
 
     def get_min_step_table(self):
+        '''
+        动态规划方法：速查表的构建
+        '''
         F = np.ones((55,27,18,14)) * 54
         F[0][0][0][0] = 0
         for i in range(55):
@@ -55,20 +56,3 @@ class CardGame(object):
                 if y:
                     current_min = min(current_min, s(x+2, y-1, z, w))
                 return current_min
-        
-        for x in range(15+1):
-            for y in range(13+1):
-                for z in range(13+1):
-                    for w in range(13+1):
-                        table[x][y][z][w] = s(x, y, z, w)
-                        
-        print(s(0,0,0,5))
-                    
-
-        
-
-
-
-
-
-c = CardGame()
