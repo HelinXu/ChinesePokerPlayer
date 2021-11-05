@@ -170,7 +170,7 @@ class CardGame(object):
             play = np.array([0]*15)
             play[i] = 1
             if self.in_limit(play): possible_plays.append((play, 0))
-        possible_plays.sort(key=lambda x: -x[1])
+        possible_plays.sort(key=lambda x: -x[1]*265-sum(x[0])*16+np.min(np.nonzero(x[0])))
         if greedy:
             possible_plays.sort(key=lambda x: -sum(x[0]))
         return possible_plays
@@ -193,7 +193,7 @@ class CardGame(object):
         for play in played:
             self.restore_cards(play)
 
-    def dfs(self, depth):
+    def dfs(self, depth, par_val=1e6):
         if self.done():
             score = log(self.value + 1e-8) / log(depth)
             if score > self.max_score:
@@ -201,19 +201,18 @@ class CardGame(object):
                 self.current_best_solution.clear()
                 self.current_best_solution = copy.deepcopy(self.current_path)
             return
+        # if depth > len(self.current_best_solution): return
         possible_plays = self.get_possible_plays()
         # print(possible_plays)
-        # first = True
+        first = True
         for this_play in possible_plays:
-            # if this_play[1] == 0 and not first: break
-            # first = False
-            # 顺子出完之后就需要开始贪心，每次出牌最多的。
-            if this_play[1] <= 4:
-                self.play_greedy(depth)
-                break
+            if this_play[1] == 0 and not first: break
+            first = False
+            if this_play[1]*265+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])) > par_val: continue
             else:
+                # print('else')
                 self.play_cards(this_play)
-                self.dfs(depth + 1)
+                self.dfs(depth + 1, this_play[1]*265+sum(this_play[0])*16-np.min(np.nonzero(this_play[0])))
                 self.restore_cards(this_play)
 
 

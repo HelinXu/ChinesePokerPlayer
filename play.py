@@ -124,9 +124,11 @@ class MainWindow(object):
         self._stage = "display"
         self.get_statistics()
         game2 = Game2(cards=self.cards)
+        tic = time.time()
         game2.solve_game()
+        toc = time.time()
         self.display_solution(game2.current_best_solution)
-        self.text.set(f'Question2 result: score = {game2.max_score}')
+        self.text.set(f'Question2 result: score = {game2.max_score}, time = {toc - tic} s')
 
 
     def display_solution(self, solution):
