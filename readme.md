@@ -2,6 +2,8 @@
 
 Author: HelinXu
 
+<img width="1274" alt="image-20211105140356503" src="https://user-images.githubusercontent.com/59716259/144416927-9a475219-3c50-43ee-bb1a-b7ac5042bc3e.png">
+
 ## Requirements
 
 - macOS Big Sur 11.5.2
